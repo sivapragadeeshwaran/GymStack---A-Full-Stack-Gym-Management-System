@@ -10,11 +10,24 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^7.0.0",
+    "@fortawesome/react-fontawesome": "^0.2.3",
     "axios": "^1.10.0",
+    "chart.js": "^4.5.0",
+    "framer-motion": "^12.23.12",
+    "lucide-react": "^0.525.0",
     "react": "^19.1.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.3",
-    "react-toastify": "^11.0.5"
+    "react-router-dom": "^7.7.1",
+    "react-slick": "^0.30.3",
+    "react-toastify": "^11.0.5",
+    "recharts": "^3.1.0",
+    "server": "file:../..",
+    "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
+    "sweetalert2": "^11.6.13",
+    "sweetalert2-react-content": "^5.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

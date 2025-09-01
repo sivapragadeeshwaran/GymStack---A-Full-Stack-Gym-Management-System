@@ -1,0 +1,51 @@
+/* Tailwind + WebKit-compatible calendar icon styling */
+.custom-calendar::-webkit-calendar-picker-indicator {
+  filter: invert(1);       /* Makes icon white */
+  cursor: pointer;
+}
+
+.swal-small {
+  width: 300px !important;
+  max-width: 500px; 
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  padding: 1rem !important;
+}
+
+/* Title, text, buttons */
+.swal-small-title {
+  font-size: 1rem !important;
+}
+.swal-small-text {
+  font-size: 0.875rem !important;
+  margin-top: 0.5rem !important;
+}
+.swal-small-btn {
+  font-size: 0.8rem !important;
+  padding: 6px 14px !important;
+  border-radius: 6px !important;
+}
+
+/* 📱 Even smaller on phones (max width 480px) */
+@media (max-width: 600px) {
+  .swal-small {
+    width: 85% !important;
+    padding: 0.75rem !important;
+  }
+  .swal-small-title {
+    font-size: 0.9rem !important;
+  }
+  .swal-small-text {
+    font-size: 0.75rem !important;
+  }
+  .swal-small-btn {
+    font-size: 0.75rem !important;
+    padding: 5px 10px !important;
+  }
+}
+
+

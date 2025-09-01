@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const userRegister = async(req,res) => {
     try{
-       // console.log("req",req.body)
+
          const { userName,email,password,role } = req.body;
         const userExist = await User.findOne({ $or:[{userName},{email}] });
         if(userExist){
@@ -33,7 +33,7 @@ const userRegister = async(req,res) => {
 
 
     }catch(e){
-        console.log("Error : ",e);
+
         res.status(500).json({
             success:false,
             message:"Something went wrong"
@@ -80,7 +80,6 @@ const userlogin = async(req,res) => {
 
 
     }catch(e){
-        console.log("Error : ",e);
         res.status(500).json({
             success:false,
             message:"Something went wrong"

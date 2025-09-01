@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const BASE_URL = "http://localhost:5000/"; // dev tunnel / production
+
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000",  // 🔁 your backend API
+  baseURL: BASE_URL, // 🔁 your backend API
   headers: {
     "Content-Type": "application/json",
   },
