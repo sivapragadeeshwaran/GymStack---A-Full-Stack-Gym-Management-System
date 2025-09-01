@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
+  username: { type: String, required: true},
   email:    { type: String, required: true, unique: true },
   password: { type: String, required: true },
 
@@ -13,13 +13,15 @@ const userSchema = new mongoose.Schema({
 
   dateOfBirth: {
     type: Date,
-    required: true
   },
-
+  phone: {
+  type: String,
+  required: true,
+  match: [/^\d{10}$/, "Phone number must be exactly 10 digits"]
+},
   membershipPlan: {
-    type: String,
-    enum: ["Monthly", "Quarterly", "Yearly"],
-    default: null
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Plan", // reference to your Plan model
   },
 
   trainerAssigned: {
@@ -59,6 +61,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-});
+   addedBy: {
+    type: String,
+    enum: ["admin", "online"],
+     default: "online"
+  }
+},{ timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

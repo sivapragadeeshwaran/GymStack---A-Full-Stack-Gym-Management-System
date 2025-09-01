@@ -1,18 +1,27 @@
-import React, { useState } from "react";
+import  { useEffect,useState } from "react";
 import axiosInstance from "../services/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function Register(){
      const navigate = useNavigate();
+     const [plans, setPlans] = useState([]);
+     const [isPaid, setIsPaid] = useState(false);
     const [formData, setFormData] = useState({
   username: "",
   email: "",
+  phone:"",
   password: "",
   dateOfBirth: "",
-  membershipPlan: "Monthly",
-  trainerAssigned: "Self", // default value
+  membershipPlan: "",
+  trainerAssigned: "Self", 
+   feeStatus: "Pending"// default value
 });
+
+const handlePayNow = () => {
+  setFormData((prev) => ({ ...prev, feeStatus: "Paid" }));
+  setIsPaid(true);
+};
 
 
 
@@ -23,7 +32,6 @@ export default function Register(){
       await axiosInstance.post("/api/users/register", {
         ...formData,
         role: "user",          // fixed role
-        feeStatus: "Paid",     // backend requires this
       });
 
       toast.success("Registration successful! Please login.");
@@ -39,11 +47,22 @@ const handleChange = (e) => {
   setFormData((prev) => ({ ...prev, [name]: value }));
 };
 
+useEffect(() => {
+  const fetchPlans = async () => {
+    try {
+      const response = await axiosInstance.get("/api/plans");
+      setPlans(response.data.data);
+    } catch (err) {
+      toast.error("Failed to load plans");
+    }
+  };
 
+  fetchPlans();
+}, []);
 
 
     return(
-       <div className="flex justify-center bg-[#141414] py-5 md:px-40">
+       <div className="flex justify-center bg-[#141414] py-5 px-4">
     <form onSubmit={handleSubmit}>
      <div className="flex flex-col w-full max-w-xl py-5">
     {/* Header */}
@@ -82,6 +101,19 @@ const handleChange = (e) => {
       </label>
     </div>
 
+    {/* Phone number */}
+    <div className="flex flex-wrap items-end gap-4 px-4 py-3 max-w-md">
+      <label className="flex flex-col flex-1 min-w-40">
+        <input
+          type="String" name="phone" value={formData.phone} onChange={handleChange}
+          placeholder="Phone Number"
+          className="w-full h-14 p-4 rounded-xl text-white bg-[#303030] placeholder-[#ababab] text-base font-normal focus:outline-none"
+        />
+      </label>
+    </div>
+
+
+
     {/* Password */}
     <div className="flex flex-wrap items-end gap-4 px-4 py-3 max-w-md">
       <label className="flex flex-col flex-1 min-w-40">
@@ -94,16 +126,22 @@ const handleChange = (e) => {
     </div>
 
     {/* Membership Plan */}
-    <div className="flex flex-wrap items-end gap-4 px-4 py-3 max-w-md">
+      <div className="flex flex-wrap items-end gap-4 px-4 py-3 max-w-md">
       <label className="flex flex-col flex-1 min-w-40">
-        <select name="membershipPlan" value={formData.membershipPlan} onChange={handleChange} 
-          className="w-full h-14 p-4 rounded-xl text-white bg-[#303030] placeholder-[#ababab] text-base font-normal focus:outline-none"
-        >
-          <option value="">Membership Plan</option>
-          <option value="Monthly">Monthly </option>
-          <option value="Quarterly">Quarterly</option>
-          <option value="Yearly">Yearly </option>
-        </select>
+   <select
+  name="membershipPlan"
+  value={formData.membershipPlan}
+  onChange={handleChange}
+  className="w-full h-14 p-4 rounded-xl text-white bg-[#303030] placeholder-[#ababab] text-base font-normal focus:outline-none"
+>
+  <option value="">Select Membership Plan</option>
+  {plans.map((plan) => (
+    <option key={plan._id} value={plan._id}>
+      {plan.name} - {plan.period} - ₹{plan.price}
+    </option>
+  ))}
+</select>
+
       </label>
     </div>
 
@@ -142,10 +180,26 @@ const handleChange = (e) => {
 
     {/* Button */}
     <div className="flex px-4 py-3">
-      <button type="submit"
-        className="w-full max-w-md h-12 px-5 rounded-xl bg-black text-white font-bold text-base tracking-wide truncate"
+      <button 
+        type="button"
+    onClick={handlePayNow}
+    className={`w-full max-w-md h-12 px-5 rounded-xl font-bold text-base tracking-wide truncate ${
+      isPaid ? "bg-[#0bda0b] text-black" : "bg-black text-white"
+    }`}
       >
         Pay Now
+      </button>
+    </div>
+    <div className="flex px-4 py-3">
+      <button    type="submit"
+    disabled={formData.feeStatus !== "Paid"}
+    className={`w-full max-w-md h-12 px-5 rounded-xl font-bold text-base tracking-wide truncate ${
+      formData.feeStatus === "Paid"
+        ? "bg-black text-white"
+        : "bg-gray-500 text-white cursor-not-allowed"
+    }`}
+      >
+        Register
       </button>
     </div>
   </div>
