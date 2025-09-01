@@ -26,7 +26,7 @@ setupSocket(server);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://gymstack-a-full-stack-gym-management-5kco.onrender.com",
     credentials: true,
   })
 );
