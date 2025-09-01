@@ -26,7 +26,7 @@ setupSocket(server);
 
 app.use(
   cors({
-    origin: "https://gymstack-a-full-stack-gym-management-5kco.onrender.com",
+    origin: "https://gymstack-a-full-stack-gym-management-f6ti.onrender.com",
     credentials: true,
   })
 );

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL =
-  "https://gymstack-a-full-stack-gym-management-5kco.onrender.com"; // dev tunnel / production
+  "https://gymstack-a-full-stack-gym-management-f6ti.onrender.com"; // dev tunnel / production
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL, // 🔁 your backend API
