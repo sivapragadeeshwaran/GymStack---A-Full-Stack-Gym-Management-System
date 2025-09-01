@@ -23,7 +23,7 @@ import Addadmin from "../components/admin/Addadmin";
 import Profile from "../components/user/Profile";
 import AddMembership from "../components/user/AddMembership";
 import TrainerProfile from "../components/trainer/TrainerProfile";
-import ClassSchedule from "../components/trainer/classSchedule";
+import ClassSchedule from "../components/trainer/ClassSchedule";
 import AddClass from "../components/trainer/AddClass";
 import UpdateClass from "../components/trainer/UpdateClass";
 import AddTrainerPanel from "../components/user/AddTrainerPanel";
