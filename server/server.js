@@ -124,6 +124,14 @@ app.post("/api/payment/verify", (req, res) => {
   }
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
 // ⭐ Backend API routes
 app.use("/api/users", UserRouter);
 app.use("/api/admin", AdminRouter);
