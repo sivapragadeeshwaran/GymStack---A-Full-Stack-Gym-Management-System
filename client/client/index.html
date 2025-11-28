@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,8 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
   </head>
+
   <body>
     <div id="root"></div>
+
+    <script>
+      window.$zoho = window.$zoho || {};
+      $zoho.salesiq = $zoho.salesiq || { ready: function () {} };
+    </script>
+    <script
+      id="zsiqscript"
+      src="https://salesiq.zohopublic.com/widget?wc=siq902db5f72b940c1ba67816743aebc699"
+      defer
+    ></script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

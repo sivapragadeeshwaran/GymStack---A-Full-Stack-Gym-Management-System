@@ -30,6 +30,7 @@ import AddTrainerPanel from "../components/user/AddTrainerPanel";
 import ClassSchedules from "../components/user/ClassSchedule";
 import Home from "../pages/Home";
 import Message from "../components/shared/Message";
+import PublicMembershipPlans from "../pages/PublicMembershipPlans";
 
 export default function AppRoutes() {
   return (
@@ -90,6 +91,7 @@ export default function AppRoutes() {
       <Route path="/forgetpassword" element={<ForgetPassword />} />
       <Route path="/resetpassword" element={<ResetPassword />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/membership-plans" element={<PublicMembershipPlans />} />
     </Routes>
   );
 }

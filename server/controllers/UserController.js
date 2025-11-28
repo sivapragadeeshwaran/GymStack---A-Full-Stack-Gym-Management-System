@@ -7,7 +7,8 @@ const mongoose = require("mongoose");
 
 const getUserProfile = async (req, res) => {
   try {
-    const userId = req.user.user_id; // Comes from auth middleware
+    // FIXED: Changed from user_id to userId
+    const userId = req.user.userId;
 
     const user = await User.findById(userId)
       .select("-password")
@@ -52,12 +53,14 @@ const getUserProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 // ------------------------------
 // ASSIGN TRAINER TO USER
 // ------------------------------
 const assignTrainerToUser = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    // FIXED: Changed from user_id to userId
+    const userId = req.user.userId;
     const { trainerId } = req.body;
 
     if (!userId || !trainerId) {
@@ -72,11 +75,9 @@ const assignTrainerToUser = async (req, res) => {
 
     // Check if fee is paid
     if (user.feeStatus !== "Paid") {
-      return res
-        .status(400)
-        .json({
-          message: "User must have a paid membership to assign a trainer.",
-        });
+      return res.status(400).json({
+        message: "User must have a paid membership to assign a trainer.",
+      });
     }
 
     // Check if membership is expired
@@ -106,11 +107,9 @@ const assignTrainerToUser = async (req, res) => {
       return res.status(404).json({ message: "Membership plan not found." });
 
     if (!plan.includesPersonalTraining) {
-      return res
-        .status(400)
-        .json({
-          message: "This membership plan does not include personal training.",
-        });
+      return res.status(400).json({
+        message: "This membership plan does not include personal training.",
+      });
     }
 
     // Assign trainer
@@ -149,7 +148,7 @@ cron.schedule("30 0 * * *", async () => {
     for (const user of expiredUsers) {
       const trainerId = user.assignedTrainerId;
 
-      // Remove user from trainer’s assignedMembers
+      // Remove user from trainer's assignedMembers
       await Trainer.findByIdAndUpdate(trainerId, {
         $pull: { assignedMembers: user._id },
       });
@@ -190,7 +189,8 @@ const getAllTrainers = async (req, res) => {
 
 const getAllClasses = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    // FIXED: Changed from user_id to userId
+    const userId = req.user.userId;
 
     // Step 1: Get the user
     const user = await User.findById(userId);
@@ -220,7 +220,8 @@ const getAllClasses = async (req, res) => {
 
 const upgradeMembership = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+    // FIXED: Changed from user_id to userId
+    const userId = req.user.userId;
     const { newPlanId, forceUpgrade } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(newPlanId)) {

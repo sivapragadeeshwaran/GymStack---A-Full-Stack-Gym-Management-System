@@ -5,7 +5,8 @@ const cloudinary = require("../utils/cloudinary");
 
 const getMyTrainerProfile = async (req, res) => {
   try {
-    const trainerId = req.user.user_id;
+    // FIXED: Changed from user_id to userId
+    const trainerId = req.user.userId;
     const trainer = await Trainer.findOne({ userId: trainerId }).populate(
       "assignedMembers"
     );
@@ -57,17 +58,20 @@ const updateTrainer = async (req, res) => {
   }
 };
 
-const addClass =  async (req, res) => {
+const addClass = async (req, res) => {
   try {
-    const trainerId = req.user.user_id;
+    // FIXED: Changed from user_id to userId
+    const trainerId = req.user.userId;
     const { day, title, time, note } = req.body;
 
     if (!trainerId || !day || !title || !time) {
-      return res.status(400).json({ error: "All fields are required except note" });
+      return res
+        .status(400)
+        .json({ error: "All fields are required except note" });
     }
 
     const newClass = new ClassSchedule({
-      trainerId:trainerId,
+      trainerId: trainerId,
       day,
       title,
       time,
@@ -76,7 +80,9 @@ const addClass =  async (req, res) => {
 
     await newClass.save();
 
-    res.status(201).json({ message: "Class created successfully", data: newClass });
+    res
+      .status(201)
+      .json({ message: "Class created successfully", data: newClass });
   } catch (err) {
     console.error("Error adding class:", err);
     res.status(500).json({ error: "Server error" });
@@ -85,16 +91,18 @@ const addClass =  async (req, res) => {
 
 const getAllClasses = async (req, res) => {
   try {
-   const trainerId = req.user.user_id;
-    const classes = await ClassSchedule.find({ trainerId })
-  .populate("trainerId", "name")
+    // FIXED: Changed from user_id to userId
+    const trainerId = req.user.userId;
+    const classes = await ClassSchedule.find({ trainerId }).populate(
+      "trainerId",
+      "name"
+    );
     res.status(200).json(classes);
   } catch (error) {
     console.error("Error fetching class schedules:", error);
     res.status(500).json({ message: "Failed to get class schedules" });
   }
 };
-
 
 const deleteClassSchedule = async (req, res) => {
   try {
@@ -128,11 +136,20 @@ const updateClassSchedule = async (req, res) => {
       return res.status(404).json({ message: "Class not found" });
     }
 
-    res.status(200).json({ message: "Class updated successfully", updatedClass });
+    res
+      .status(200)
+      .json({ message: "Class updated successfully", updatedClass });
   } catch (error) {
     console.error("Error updating class:", error);
     res.status(500).json({ message: "Failed to update class" });
   }
-}
+};
 
-module.exports = { getMyTrainerProfile, updateTrainer,addClass,getAllClasses,deleteClassSchedule,updateClassSchedule};
+module.exports = {
+  getMyTrainerProfile,
+  updateTrainer,
+  addClass,
+  getAllClasses,
+  deleteClassSchedule,
+  updateClassSchedule,
+};

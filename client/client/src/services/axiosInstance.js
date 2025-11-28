@@ -1,22 +1,14 @@
+// src/services/axiosInstance.js
 import axios from "axios";
 
-const BASE_URL =
-  "https://gymstack-a-full-stack-gym-management-5kco.onrender.com"; // dev tunnel / production
+const BASE_URL = "http://localhost:5000";
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL, // 🔁 your backend API
+  baseURL: BASE_URL,
+  withCredentials: true, // ⬅️ IMPORTANT
   headers: {
     "Content-Type": "application/json",
   },
-});
-
-// 🔐 Automatically attach token before every request
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
 });
 
 export default axiosInstance;

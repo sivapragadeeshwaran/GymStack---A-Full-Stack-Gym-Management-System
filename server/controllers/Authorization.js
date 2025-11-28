@@ -112,57 +112,100 @@ const userlogin = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "username or password not matched",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "username or password not matched" });
     }
 
-    const accessToken = jwt.sign(
+    const token = jwt.sign(
       {
-        user_id: user._id,
+        userId: user._id,
         username: user.username,
         role: user.role,
-        firstLogin: user.firstLogin,
       },
       process.env.USER_SECRET_KEY,
-      {
-        expiresIn: "60d",
-      }
+      { expiresIn: "60d" }
     );
 
-    res.status(201).json({
+    // Fixed cookie settings
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: isProduction, // true in production, false in development
+      sameSite: isProduction ? "None" : "Lax", // 'None' for production, 'Lax' for development
+      maxAge: 60 * 24 * 60 * 60 * 1000,
+      domain: isProduction ? ".yourdomain.com" : "localhost", // Adjust as needed
+    });
+
+    // IMPORTANT: Return the token in the response body
+    res.status(200).json({
       success: true,
-      message: "user logined successfully",
-      accessToken,
+      message: "Login successful",
+      token: token, // Add this line to return the token in the response
       user: {
-        user_id: user._id,
+        _id: user._id,
         username: user.username,
         role: user.role,
-        firstLogin: user.firstLogin,
-        addedBy: user.addedBy,
         assignedTrainerId: user.assignedTrainerId,
+        addedBy: user.addedBy,
       },
     });
   } catch (e) {
-    console.log("Error : ", e);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-    });
+    console.log("Error:", e);
+    res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
+// Add this function to your user controller
+const verifyToken = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.USER_SECRET_KEY);
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        assignedTrainerId: user.assignedTrainerId,
+        addedBy: user.addedBy,
+      },
+    });
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid or expired token" });
+  }
+};
+
+// Update your module.exports to include this function
 module.exports = {
   userRegister,
   userlogin,
+  verifyToken,
 };

@@ -7,7 +7,7 @@ const { getIO } = require("../utils/messageSocket");
 exports.sendMessage = async (req, res) => {
   try {
     const { receiverId, content } = req.body;
-    const senderId = req.user.user_id;
+    const senderId = req.user.userId; // FIXED: Changed from user_id to userId
 
     const sender = await User.findById(senderId);
     const receiver = await User.findById(receiverId);
@@ -45,7 +45,7 @@ exports.sendMessage = async (req, res) => {
 exports.getChat = async (req, res) => {
   try {
     const { userId } = req.params;
-    const currentUserId = req.user.user_id;
+    const currentUserId = req.user.userId; // FIXED: Changed from user_id to userId
 
     const messages = await Message.find({
       $or: [
@@ -64,11 +64,20 @@ exports.getChat = async (req, res) => {
   }
 };
 
-// Allowed contacts (unchanged)
+// Allowed contacts
 exports.getAllowedContacts = async (req, res) => {
   try {
-    const currentUserId = req.user.user_id;
+    const currentUserId = req.user.userId; // FIXED: Changed from user_id to userId
     const currentUser = await User.findById(currentUserId);
+
+    // Add null check for currentUser
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
     let contacts = [];
 
     if (currentUser.role === "admin") {

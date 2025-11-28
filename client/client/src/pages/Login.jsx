@@ -1,9 +1,8 @@
-// src/pages/Login.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import axiosInstance from "../services/axiosInstance";
-import { useAuth } from "../services/authService"; // correct path to your AuthContext
+import { useAuth } from "../services/authService";
 
 export default function Login() {
   const { authUser, login } = useAuth();
@@ -11,14 +10,15 @@ export default function Login() {
   const location = useLocation();
 
   const from = location.state?.from?.pathname || null;
+  const selectedPlanId = location.state?.selectedPlanId || null;
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
   const [submitting, setSubmitting] = useState(false);
 
-  // if already logged in, redirect to appropriate panel
   useEffect(() => {
     if (authUser) {
       const role = authUser.role?.toLowerCase();
@@ -27,51 +27,78 @@ export default function Login() {
         trainer: "/trainerpanel",
         user: "/userpanel",
       };
-      navigate(roleMap[role] || "/", { replace: true });
+
+      // If we came from membership plans with a selected plan, redirect back there
+      if (from === "/membership-plans" && selectedPlanId) {
+        navigate(from, {
+          replace: true,
+          state: { selectedPlanId },
+        });
+      } else {
+        navigate(roleMap[role] || "/", { replace: true });
+      }
     }
-  }, [authUser, navigate]);
+  }, [authUser, navigate, from, selectedPlanId]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+
+    console.log("=== LOGIN PROCESS START ===");
+    console.log("Form data:", formData);
+
     try {
+      console.log("Sending login request...");
       const res = await axiosInstance.post("/api/users/login", formData);
 
-      const token = res.data.accessToken;
-      const user = res.data.user;
+      console.log("Login response received:", res);
+      console.log("Response data:", res.data);
 
-      if (!token || !user) {
-        throw new Error("Invalid response from server");
+      const { user, token } = res.data;
+
+      console.log("Extracted user:", user);
+      console.log("Extracted token:", token);
+
+      if (!token) {
+        console.error("❌ No token in response");
+        toast.error("Login failed: No token received");
+        return;
       }
 
-      // Persist in context (which also sets localStorage)
+      console.log("✅ Token exists, calling AuthContext login function...");
       login(user, token);
 
-      // Redirect priority: protected route origin > role-based panel
-      if (from) {
-        navigate(from, { replace: true });
+      console.log("✅ AuthContext login function called");
+      toast.success("Login successful!");
+
+      // If we came from membership plans with a selected plan, redirect back there
+      if (from === "/membership-plans" && selectedPlanId) {
+        navigate(from, {
+          replace: true,
+          state: { selectedPlanId },
+        });
       } else {
         const role = user.role?.toLowerCase();
-        const roleMap = {
-          admin: "/adminpanel",
-          trainer: "/trainerpanel",
-          user: "/userpanel",
-        };
-        navigate(roleMap[role] || "/", { replace: true });
+        console.log("Navigating to role-based dashboard:", role);
+        navigate(
+          {
+            admin: "/adminpanel",
+            trainer: "/trainerpanel",
+            user: "/userpanel",
+          }[role] || "/"
+        );
       }
-
-      toast.success("Login successful!");
     } catch (err) {
-      const msg =
-        err.response?.data?.message || err.message || "Login failed.";
-      toast.error(msg);
+      console.error("❌ Login error:", err);
+      console.error("Error response:", err.response);
+      toast.error(err.response?.data?.message || "Login failed");
     } finally {
       setSubmitting(false);
+      console.log("=== LOGIN PROCESS END ===");
     }
   };
 
@@ -81,39 +108,36 @@ export default function Login() {
         <h2 className="text-white md:px-48 text-[28px] font-bold leading-tight px-[190px] pt-5 pb-3">
           Login
         </h2>
+
         <form onSubmit={handleSubmit}>
-          {/* Email Field */}
+          {/* Email */}
           <div className="flex flex-wrap items-end gap-4 px-4 py-3 max-w-md">
             <label className="flex flex-col flex-1 min-w-40">
-              <p className="text-white text-base font-medium leading-normal pb-2">
-                Email
-              </p>
+              <p className="text-white pb-2">Email</p>
               <input
                 required
                 type="email"
-                placeholder="Enter your email"
                 name="email"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full h-14 p-4 rounded-lg text-white bg-[#363636] placeholder-[#adadad] text-base font-normal focus:outline-none"
+                className="w-full h-14 p-4 rounded-lg bg-[#363636] text-white placeholder-[#adadad]"
               />
             </label>
           </div>
 
-          {/* Password Field */}
+          {/* Password */}
           <div className="flex flex-wrap items-end gap-4 px-4 py-3 max-w-md">
             <label className="flex flex-col flex-1 min-w-40">
-              <p className="text-white text-base font-medium leading-normal pb-2">
-                Password
-              </p>
+              <p className="text-white pb-2">Password</p>
               <input
                 required
                 type="password"
-                placeholder="Enter your password"
                 name="password"
+                placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full h-14 p-4 rounded-lg text-white bg-[#363636] placeholder-[#adadad] text-base font-normal focus:outline-none"
+                className="w-full h-14 p-4 rounded-lg bg-[#363636] text-white placeholder-[#adadad]"
               />
             </label>
           </div>
@@ -126,17 +150,17 @@ export default function Login() {
             Forgot password?
           </p>
 
-          {/* Login Button */}
           <div className="flex px-4 py-3 max-w-md">
             <button
               type="submit"
               disabled={submitting}
-              className="w-full max-w-md h-12 rounded-lg bg-black text-white text-base font-bold tracking-wide truncate disabled:opacity-60"
+              className="w-full h-12 rounded-lg bg-black text-white disabled:opacity-60"
             >
               {submitting ? "Logging in..." : "Login"}
             </button>
           </div>
 
+          {/* Register Link */}
           <p className="text-[#adadad] text-sm font-normal leading-normal px-[110px] md:px-36 pt-1 pb-3">
             Don't have an account?{" "}
             <span

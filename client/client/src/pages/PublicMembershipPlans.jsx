@@ -1,9 +1,10 @@
-import axiosInstance from "../../services/axiosInstance";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../services/authService";
+import axiosInstance from "../services/axiosInstance";
 import Swal from "sweetalert2";
-import { useAuth } from "../../services/authService";
 
-// Add this function to load Razorpay script
+// Function to load Razorpay script
 function loadRazorpayScript(src) {
   return new Promise((resolve) => {
     const script = document.createElement("script");
@@ -14,11 +15,24 @@ function loadRazorpayScript(src) {
   });
 }
 
-export default function AddMembership() {
+export default function PublicMembershipPlans() {
   const [plans, setPlans] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { authUser, login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we're returning from login with a selected plan
+  useEffect(() => {
+    if (location.state?.selectedPlanId) {
+      setSelectedPlanId(location.state.selectedPlanId);
+      // Trigger payment after login
+      if (authUser) {
+        handlePay();
+      }
+    }
+  }, [location.state, authUser]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -34,6 +48,37 @@ export default function AddMembership() {
 
     fetchPlans();
   }, []);
+
+  const handleSubscribe = () => {
+    if (!selectedPlanId) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Plan Selected",
+        text: "Please select a membership plan to continue.",
+        color: "#fff",
+        customClass: {
+          popup: "swal-small",
+          title: "swal-small-title",
+          htmlContainer: "swal-small-text",
+          confirmButton: "swal-small-btn",
+        },
+      });
+      return;
+    }
+
+    if (authUser) {
+      // User is logged in, proceed to payment
+      handlePay();
+    } else {
+      // User is not logged in, redirect to login page with state
+      navigate("/login", {
+        state: {
+          from: { pathname: "/membership-plans" },
+          selectedPlanId: selectedPlanId,
+        },
+      });
+    }
+  };
 
   const handlePay = async () => {
     if (!selectedPlanId || isProcessing) return;
@@ -53,7 +98,6 @@ export default function AddMembership() {
           title: "swal-small-title",
           htmlContainer: "swal-small-text",
           confirmButton: "swal-small-btn",
-          cancelButton: "swal-small-btn",
         },
       });
     }
@@ -74,7 +118,6 @@ export default function AddMembership() {
           title: "swal-small-title",
           htmlContainer: "swal-small-text",
           confirmButton: "swal-small-btn",
-          cancelButton: "swal-small-btn",
         },
       });
     }
@@ -92,7 +135,7 @@ export default function AddMembership() {
       const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
       const options = {
-        key: razorpayKey, // Fixed: using import.meta.env instead of process.env
+        key: razorpayKey,
         amount: order.amount,
         currency: order.currency,
         name: "GymStack",
@@ -123,7 +166,6 @@ export default function AddMembership() {
                 title: "swal-small-title",
                 htmlContainer: "swal-small-text",
                 confirmButton: "swal-small-btn",
-                cancelButton: "swal-small-btn",
               },
             });
             setIsProcessing(false);
@@ -154,7 +196,6 @@ export default function AddMembership() {
             title: "swal-small-title",
             htmlContainer: "swal-small-text",
             confirmButton: "swal-small-btn",
-            cancelButton: "swal-small-btn",
           },
         });
         setIsProcessing(false);
@@ -172,7 +213,6 @@ export default function AddMembership() {
           title: "swal-small-title",
           htmlContainer: "swal-small-text",
           confirmButton: "swal-small-btn",
-          cancelButton: "swal-small-btn",
         },
       });
       setIsProcessing(false);
@@ -198,7 +238,6 @@ export default function AddMembership() {
           title: "swal-small-title",
           htmlContainer: "swal-small-text",
           confirmButton: "swal-small-btn",
-          cancelButton: "swal-small-btn",
         },
       });
 
@@ -249,7 +288,6 @@ export default function AddMembership() {
                 title: "swal-small-title",
                 htmlContainer: "swal-small-text",
                 confirmButton: "swal-small-btn",
-                cancelButton: "swal-small-btn",
               },
             });
 
@@ -271,7 +309,6 @@ export default function AddMembership() {
                 title: "swal-small-title",
                 htmlContainer: "swal-small-text",
                 confirmButton: "swal-small-btn",
-                cancelButton: "swal-small-btn",
               },
             });
           }
@@ -287,7 +324,6 @@ export default function AddMembership() {
             title: "swal-small-title",
             htmlContainer: "swal-small-text",
             confirmButton: "swal-small-btn",
-            cancelButton: "swal-small-btn",
           },
         });
       }
@@ -297,10 +333,10 @@ export default function AddMembership() {
   };
 
   return (
-    <div className="px-4 py-5">
+    <div className="px-4 py-5 bg-[#141414] min-h-screen">
       <div className="flex flex-wrap justify-between gap-3 p-4">
         <p className="text-white tracking-light text-[32px] font-bold leading-tight min-w-72">
-          Membership
+          Membership Plans
         </p>
       </div>
 
@@ -350,7 +386,7 @@ export default function AddMembership() {
       <div className="flex px-4 py-3 justify-center">
         <button
           disabled={!selectedPlanId || isProcessing}
-          onClick={handlePay}
+          onClick={handleSubscribe}
           className={`flex min-w-[300px] max-w-[700px] border-2 cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 text-white text-sm font-bold leading-normal tracking-[0.015em] 
             ${
               selectedPlanId
@@ -363,7 +399,7 @@ export default function AddMembership() {
               selectedPlanId ? "text-[#0bda0b] " : "text-white"
             }`}
           >
-            {isProcessing ? "Processing..." : "Pay Now"}
+            {isProcessing ? "Processing..." : "Subscribe"}
           </span>
         </button>
       </div>
